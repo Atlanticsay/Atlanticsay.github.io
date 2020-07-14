@@ -6,19 +6,14 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>macOS Configuration for JDK11 | Hexo</title>
+  <title>Tag: markdown | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="macOS下JDK11的配置">
-<meta property="og:type" content="article">
-<meta property="og:title" content="macOS Configuration for JDK11">
-<meta property="og:url" content="http://yoursite.com/2020/07/09/macOS%20Configuration%20for%20JDK11/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://yoursite.com/tags/markdown/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="macOS下JDK11的配置">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2020-07-08T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-07-11T11:09:40.729Z">
 <meta property="article:author" content="Hale">
-<meta property="article:tag" content="配置">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
@@ -161,257 +156,59 @@
           </div>
           <div id="js-content" class="content-ll">
             
-<article id="post-macOS Configuration for JDK11" class="article article-type-post " itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 class="article-title" itemprop="name">
-      macOS Configuration for JDK11
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2020" class="archive-year">2020</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      	<div class="article-meta">
+	      	<a href="/2020/07/14/hello-world/" class="archive-article-date">
+  	<time datetime="2020-07-14T02:17:17.055Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-14</time>
+</a>
+        </div>
+    	 
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2020/07/14/hello-world/">Hello World</a>
     </h1>
   
 
-        <!--显示阅读次数-->
-        
-          <br/>
-          <a class="cloud-tie-join-count" href="javascript:void(0);" style="color:gray;font-size:14px;">
-          <span class="icon-sort"></span>
-          <span id="busuanzi_container_page_pv" style="color:#ef7522;font-size:14px;">
-                    阅读数: <span id="busuanzi_value_page_pv"></span>次 &nbsp;&nbsp;
-          </span>
-          </a>
-        
-        <!--显示阅读次数完毕-->
-        
-        <a href="/2020/07/09/macOS%20Configuration%20for%20JDK11/" class="archive-article-date">
-  	<time datetime="2020-07-08T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="macOS下JDK11的配置"><a href="#macOS下JDK11的配置" class="headerlink" title="macOS下JDK11的配置"></a>macOS下JDK11的配置</h3><a id="more"></a>
-
-<h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1.安装"></a>1.安装</h3><p>在官网下载JDK11，为了后续安装方便，选择dmg格式</p>
-<p>下载后在Finder中点击文件，一键安装，安装目录默认在 /Library/Java/JavaVirtualMachines 中</p>
-<p>打开终端terminal，输入以下命令查看是否安装成功</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">java --version</span><br><span class="line">javac --version</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-环境变量的配置"><a href="#2-环境变量的配置" class="headerlink" title="2. 环境变量的配置"></a>2. 环境变量的配置</h3><p>修改home文件夹下的 bash_profile<br>首先进入主目录, 查看是否存在bash_profile<br>也可以去home文件夹中直接查看（command + shift + . 显示系统隐藏文件）</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd ~&#x2F;</span><br><span class="line">ls -al</span><br></pre></td></tr></table></figure>
-
-<p>如果不存在，则创建bash_profile</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">touch .bash_profile</span><br></pre></td></tr></table></figure>
-
-<p>并打开，以下为两种打开方式</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">open -e .bash_profile</span><br><span class="line">vim ~&#x2F;.bash_profile</span><br></pre></td></tr></table></figure>
-
-<p>在.bash_profile中输入如下内容，注意 JDK所在的路径需自行查看</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME&#x3D;&#x2F;Library&#x2F;Java&#x2F;JavaVirtualMachines&#x2F;jdk-11.jdk&#x2F;Contents&#x2F;Home</span><br><span class="line">export PATH&#x3D;$JAVA_HOME&#x2F;bin:$PATH:.</span><br></pre></td></tr></table></figure>
-
-<p>补充，虽然本文讲解内容为JDK11，但若为JDK8以前的版本，还需要多添加以下内容</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export CLASSPATH&#x3D;$JAVA_HOME&#x2F;lib&#x2F;tools.jar:$JAVA_HOME&#x2F;lib&#x2F;dt.jar:.</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-保存并应用配置"><a href="#3-保存并应用配置" class="headerlink" title="3. 保存并应用配置"></a>3. 保存并应用配置</h3><p>在terminal中输入以下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source .bash_profile</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-测试"><a href="#4-测试" class="headerlink" title="4.测试"></a>4.测试</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">java --version</span><br><span class="line">javac --version</span><br></pre></td></tr></table></figure>
-<p>正确结果类似如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">macBook-Pro ~ % java --version</span><br><span class="line">java 11.0.6 2020-01-14 LTS</span><br><span class="line">Java(TM) SE Runtime Environment 18.9 (build 11.0.6+8-LTS)</span><br><span class="line">Java HotSpot(TM) 64-Bit Server VM 18.9 (build 11.0.6+8-LTS, mixed mode)</span><br><span class="line">macBook-Pro ~ % javac --version</span><br><span class="line">javac 11.0.6</span><br></pre></td></tr></table></figure>
-
-
-      
-
-      
-
-      
-        <div class="page-reward">
-          <a href="javascript:;" class="page-reward-btn tooltip-top">
-            <div class="tooltip tooltip-east">
-            <!-- 增加版权声明 -->
-
-            <!- 百度自动推送方式提交 -->
-            
-              <script>
-              (function(){
-                  var bp = document.createElement('script');
-                  var curProtocol = window.location.protocol.split(':')[0];
-                  if (curProtocol === 'https') {
-                      bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
-                  }
-                  else {
-                      bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-                  }
-                  var s = document.getElementsByTagName("script")[0];
-                  s.parentNode.insertBefore(bp, s);
-              })();
-              </script>
-            
-            <!- 百度自动推送方式提交结束 -->
-
-            
-            
-            <div class="declare" hidden="hidden"></div>
-            
-
-            <!-- 增加版权声明结束 -->  
-            <span class="tooltip-item">
-              赏
-            </span>
-            <span class="tooltip-content">
-              <span class="tooltip-text">
-                <span class="tooltip-inner">
-                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
-                  <div class="reward-box">
-                    
-                    <div class="reward-box-item">
-                      <img class="reward-img" src="/assets/img/alipay.png">
-                      <span class="reward-type">支付宝</span>
-                    </div>
-                    
-                    
-                  </div>
-                </span>
-              </span>
-            </span>
-          </div>
-          </a>
-        </div>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
+        <div class="article-info info-on-right">
+          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">配置</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">markdown</a>
         		</li>
       		
 		</ul>
 	</div>
 
-      
+          
 
-      
-
-      
-        
-<div class="share-btn share-icons tooltip-left">
-  <div class="tooltip tooltip-east">
-    <span class="tooltip-item">
-      <a href="javascript:;" class="share-sns share-outer">
-        <i class="icon icon-share"></i>
-      </a>
-    </span>
-    <span class="tooltip-content">
-      <div class="share-wrap">
-        <div class="share-icons">
-          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
-            <i class="icon icon-weibo"></i>
-          </a>
-          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
-            <i class="icon icon-weixin"></i>
-          </a>
-          <a class="qq share-sns" href="javascript:;" data-type="qq">
-            <i class="icon icon-qq"></i>
-          </a>
-          <a class="douban share-sns" href="javascript:;" data-type="douban">
-            <i class="icon icon-douban"></i>
-          </a>
-          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
-            <i class="icon icon-qzone"></i>
-          </a>
-          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
-            <i class="icon icon-facebook"></i>
-          </a>
-          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
-            <i class="icon icon-twitter"></i>
-          </a>
-          <a class="google share-sns" href="javascript:;" data-type="google">
-            <i class="icon icon-google"></i>
-          </a>
         </div>
-      </div>
-    </span>
-  </div>
-</div>
-
-<div class="page-modal wx-share js-wx-box">
-    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://atlanticsay.github.io/http://yoursite.com/2020/07/09/macOS%20Configuration%20for%20JDK11/" alt="微信分享二维码">
-    </div>
-</div>
-
-<div class="mask js-mask"></div>
-      
-      <div class="clearfix"></div>
-    </div>
+        <div class="clearfix"></div>
+    </header>
   </div>
 </article>
-
-  
-<nav id="article-nav">
-  
-    <a href="/2020/07/13/2020-07-13-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E9%80%9A%E8%AE%AF%E9%97%AE%E9%A2%98/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          多线程通信问题
-        
-      </div>
-    </a>
   
   
-</nav>
-
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-        <div class="toc-container tooltip-left">
-            <i class="icon-font icon-category"></i>
-            <div class="tooltip tooltip-east">
-                <span class="tooltip-item">
-                </span>
-                <span class="tooltip-content">
-                    <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#macOS下JDK11的配置"><span class="toc-number">1.</span> <span class="toc-text">macOS下JDK11的配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-安装"><span class="toc-number">2.</span> <span class="toc-text">1.安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-环境变量的配置"><span class="toc-number">3.</span> <span class="toc-text">2. 环境变量的配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-保存并应用配置"><span class="toc-number">4.</span> <span class="toc-text">3. 保存并应用配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-测试"><span class="toc-number">5.</span> <span class="toc-text">4.测试</span></a></li></ol>
-                    </div>
-                </span>
-            </div>
-        </div>
-        
-    </div>
-</aside>
-
-
-
-  
-  
+    </div></section>
   
 
-  
-
-  
-
-  
+    
 
 
           </div>
@@ -434,9 +231,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: true,
+		isPost: false,
 		isArchive: false,
-		isTag: false,
+		isTag: true,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
