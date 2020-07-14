@@ -6,15 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Tag: 随笔 | Hexo</title>
+  <title>线程状态的划分：操作系统与Java | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/tags/%E9%9A%8F%E7%AC%94/index.html">
+  <meta name="description" content="java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线程状态的划分：操作系统与Java">
+<meta property="og:url" content="http://yoursite.com/2020/07/13/2020-07-12-%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E7%9A%84%E5%88%92%E5%88%86/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/Atlanticsay/MixtureFiles/master/images/States.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Atlanticsay/MixtureFiles/master/images/thread%20states%20and%20their%20transition.png">
+<meta property="article:published_time" content="2020-07-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-14T03:50:51.244Z">
 <meta property="article:author" content="Hale">
+<meta property="article:tag" content="多线程">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Atlanticsay/MixtureFiles/master/images/States.png">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -62,7 +70,7 @@
 			</ul>
 		</nav>
 		<nav>
-			总文章数 2
+			总文章数 4
 		</nav>
 		<nav class="header-smart-menu">
     		
@@ -156,59 +164,314 @@
           </div>
           <div id="js-content" class="content-ll">
             
-  
-  
+<article id="post-2020-07-12-线程状态的划分" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/06/22/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/" class="archive-article-date">
-  	<time datetime="2020-06-22T06:34:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-22</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/06/22/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/">我的第一篇博客文章</a>
+    <h1 class="article-title" itemprop="name">
+      线程状态的划分：操作系统与Java
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        <!--显示阅读次数-->
+        
+          <br/>
+          <a class="cloud-tie-join-count" href="javascript:void(0);" style="color:gray;font-size:14px;">
+          <span class="icon-sort"></span>
+          <span id="busuanzi_container_page_pv" style="color:#ef7522;font-size:14px;">
+                    阅读数: <span id="busuanzi_value_page_pv"></span>次 &nbsp;&nbsp;
+          </span>
+          </a>
+        
+        <!--显示阅读次数完毕-->
+        
+        <a href="/2020/07/13/2020-07-12-%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E7%9A%84%E5%88%92%E5%88%86/" class="archive-article-date">
+  	<time datetime="2020-07-12T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧"><a href="#java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧" class="headerlink" title="java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧"></a>java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧</h3><a id="more"></a>
+
+<h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>在现代操作系统中，一个进程通常由多个称为线程的执行单元组成，每个线程都运行在进程的上下文中，并共享同样的代码和全局数据。线程如同进程一样，在给定的时间内，可能处于不同的状态（本文暂时不谈线程间的上下文转换）。而JVM规定线程采用抢占式调度策略（schedule policy），即让线程抢占时间片，然后确定哪个线程可以占用CPU资源进行执行，该策略与java中线程状态的划分密切相关。总的来说，操作系统中线程状态的划分和java官方给定的划分不尽相同，因此本文对此作了区分和阐述。</p>
+<h4 id="操作系统线程划分"><a href="#操作系统线程划分" class="headerlink" title="操作系统线程划分"></a>操作系统线程划分</h4><p>操作系统中，和进程相似，线程的状态主要有运行（Running）、阻塞（Blocked）、以及就绪（Ready）<a href="https://web.stanford.edu/~ouster/cgi-bin/cs140-spring14/lecture.php?topic=thread" target="_blank" rel="noopener">^1</a></p>
+<p>如下图所示</p>
+<div align=center><img src="https://raw.githubusercontent.com/Atlanticsay/MixtureFiles/master/images/States.png" style="zoom:60%;" />
+
+
+<p>从就绪到运行，代表该线程已经被调度（Scheduled），从运行转移到就绪，代表取消调度（descheduled）。一旦被阻塞，如发起I/O操作，OS将保持这种状态，直到发生某件事情，如I/O完成。此时便进入就绪状态 [^2]。</p>
+<h4 id="Java中的线程状态划分"><a href="#Java中的线程状态划分" class="headerlink" title="Java中的线程状态划分"></a>Java中的线程状态划分</h4><p>查看官方文档<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html" target="_blank" rel="noopener">Thread.State</a>，线程的状态被划分为了六种：初始（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#NEW" target="_blank" rel="noopener">NEW</a> ）、运行中（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#RUNNABLE" target="_blank" rel="noopener">RUNNABLE</a> ）、阻塞（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#BLOCKED" target="_blank" rel="noopener">BLOCKED</a> ）、等待（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#WAITING" target="_blank" rel="noopener">WAITING</a> ）、超时等待/计时等待（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#TIMED_WAITING" target="_blank" rel="noopener">TIMED_WAITING</a> ）、终止（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#TERMINATED" target="_blank" rel="noopener">TERMINATED</a> ）。它们之间的转换关系如下图所示[^3]：</p>
+<p><img src="https://raw.githubusercontent.com/Atlanticsay/MixtureFiles/master/images/thread%20states%20and%20their%20transition.png" alt=""></p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** 官方文档里明确说明，这些状态并不代表任何操作系统线程的状态  */</span></span><br><span class="line">doc: These states are virtual machine states which <span class="keyword">do</span> not reflect any operating system thread states.</span><br><span class="line"><span class="comment">/** 但是也提示了，RUNNABLE状态，除了执行，也包括在等待操作系统资源的情况，即包括操作系统的运行和就绪*/</span></span><br><span class="line">A thread in the runnable state is executing in the Java virtual machine but it may be waiting <span class="keyword">for</span> other resources from the operating system such as processor.</span><br></pre></td></tr></table></figure>
+
+
+
+<p>每个状态的解释和产生条件如下：</p>
+<ol>
+<li><p>NEW 状态：表示刚被创建，但是还没有启动</p>
+</li>
+<li><p><strong>RUNNABLE状态：是操作系统中 <code>就绪</code> 和<code>运行</code>两种状态的统称</strong></p>
+<blockquote>
+<p>具体是哪个取决于JVM线程调度器的schedule</p>
+<ul>
+<li><p>当前线程调用<code>Thread.start()</code></p>
+</li>
+<li><p>当前线程<code>Thread.sleep()</code>的时间到</p>
+</li>
+<li><p>其他线程调用<code>join()</code>结束后</p>
+</li>
+<li><p>线程抢到了锁，从<code>BLOCKED</code>状态转化为就绪状态</p>
+<p>👆上面几个都是转化为<code>就绪</code>状态</p>
+</li>
+<li><p>当前或其他线程调用 <code>LockSupport.unpark(Thread)</code></p>
+</li>
+</ul>
+</blockquote>
+</li>
+<li><p>BLOCKED状态：表示线程正在等待监视器锁，以便抢到锁之后执行。</p>
+<blockquote>
+<ul>
+<li>线程在等待锁进入由synchronized修饰的<code>同步方法</code>或<code>同步代码</code>块时，会进入阻塞状态；</li>
+</ul>
+<p>​       获取锁后变为<code>就绪</code>状态</p>
+<ul>
+<li>当前线程从<code>WAITING</code>状态中醒来，通过调用<code>Object.notify()</code>, 或<code>Object.notifyAll()</code></li>
+</ul>
+</blockquote>
+</li>
+<li><p>WAITING状态：无限休眠直到被某个线程唤醒。进入该状态的原因：</p>
+<blockquote>
+<ul>
+<li><p>当前线程对象调用<code>Object.wait()</code>方法</p>
+<p>（使用<code>notify()</code>或<code>notifyAll()</code>唤醒；或<code>LockSupport.unpark(Thread t)</code>唤醒）</p>
+</li>
+<li><p>当前线程运行过程中，其他线程调用<code>Thread.join()</code>方法</p>
+</li>
+<li><p>调用<code>LockSupport.park()</code> （不会释放锁资源）</p>
+</li>
+</ul>
+</blockquote>
+</li>
+<li><p>TIME_WAITING状态：计时等待一段给定的时间便醒来</p>
+<blockquote>
+<ul>
+<li>当前线程调用<code>Thread.sleep(long time)</code> （不会释放占有的锁）</li>
+<li>当前线程中的对象调用 <code>Object.wait(long time)</code> （会释放锁资源）</li>
+<li>其他线程调用 <code>join(time)</code> </li>
+<li>线程调用<code>LockSupport.parkNanos()</code> 或 <code>LockSupport.partUntil()</code></li>
+</ul>
+</blockquote>
+</li>
+<li><p>TERMINATE状态：终止</p>
+<blockquote>
+<ul>
+<li>线程正常终止：<code>run()</code>或<code>call()</code>方法执行完毕</li>
+<li>线程抛出Exception或Error</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<p>[^2]: Operating System: Three Easy Pieces<br>[^3]: <a href="http://www.uml-diagrams.org/java-thread-uml-state-machine-diagram-example.html" target="_blank" rel="noopener">http://www.uml-diagrams.org/java-thread-uml-state-machine-diagram-example.html</a></p>
+
+      
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <!-- 增加版权声明 -->
+
+            <!- 百度自动推送方式提交 -->
+            
+              <script>
+              (function(){
+                  var bp = document.createElement('script');
+                  var curProtocol = window.location.protocol.split(':')[0];
+                  if (curProtocol === 'https') {
+                      bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+                  }
+                  else {
+                      bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+                  }
+                  var s = document.getElementsByTagName("script")[0];
+                  s.parentNode.insertBefore(bp, s);
+              })();
+              </script>
+            
+            <!- 百度自动推送方式提交结束 -->
+
+            
+            
+            <div class="declare" hidden="hidden"></div>
+            
+
+            <!-- 增加版权声明结束 -->  
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assets/img/alipay.png">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">随笔</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://atlanticsay.github.io/http://yoursite.com/2020/07/13/2020-07-12-%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E7%9A%84%E5%88%92%E5%88%86/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2020/07/14/hello-world/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Hello World
+        
+      </div>
+    </a>
   
   
-    </div></section>
+    <a href="/2020/07/13/2020-07-13-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E9%80%9A%E8%AE%AF%E9%97%AE%E9%A2%98/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">多线程通信问题</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧"><span class="toc-number">1.</span> <span class="toc-text">java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#引言"><span class="toc-number">1.1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#操作系统线程划分"><span class="toc-number">1.2.</span> <span class="toc-text">操作系统线程划分</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Java中的线程状态划分"><span class="toc-number">1.3.</span> <span class="toc-text">Java中的线程状态划分</span></a></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -231,9 +494,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
@@ -301,7 +564,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">随笔</a>
+                <a href="javascript:void(0)" class="js-tag color4">多线程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">配置</a>
               </li>
             
             <div class="clearfix"></div>

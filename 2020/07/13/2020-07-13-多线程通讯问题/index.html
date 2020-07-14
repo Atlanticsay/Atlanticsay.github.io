@@ -6,14 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives: 2020/6 | Hexo</title>
+  <title>多线程通信问题 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/archives/2020/06/index.html">
+  <meta name="description" content="经典的多线程通信问题：生产者与消费者问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多线程通信问题">
+<meta property="og:url" content="http://yoursite.com/2020/07/13/2020-07-13-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E9%80%9A%E8%AE%AF%E9%97%AE%E9%A2%98/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="经典的多线程通信问题：生产者与消费者问题">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-07-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-13T03:07:41.415Z">
 <meta property="article:author" content="Hale">
+<meta property="article:tag" content="多线程">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
@@ -62,7 +67,7 @@
 			</ul>
 		</nav>
 		<nav>
-			总文章数 2
+			总文章数 4
 		</nav>
 		<nav class="header-smart-menu">
     		
@@ -156,59 +161,274 @@
           </div>
           <div id="js-content" class="content-ll">
             
-  
-  
+<article id="post-2020-07-13-多线程通讯问题" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/06/22/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/" class="archive-article-date">
-  	<time datetime="2020-06-22T06:34:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-22</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/06/22/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/">我的第一篇博客文章</a>
+    <h1 class="article-title" itemprop="name">
+      多线程通信问题
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        <!--显示阅读次数-->
+        
+          <br/>
+          <a class="cloud-tie-join-count" href="javascript:void(0);" style="color:gray;font-size:14px;">
+          <span class="icon-sort"></span>
+          <span id="busuanzi_container_page_pv" style="color:#ef7522;font-size:14px;">
+                    阅读数: <span id="busuanzi_value_page_pv"></span>次 &nbsp;&nbsp;
+          </span>
+          </a>
+        
+        <!--显示阅读次数完毕-->
+        
+        <a href="/2020/07/13/2020-07-13-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E9%80%9A%E8%AE%AF%E9%97%AE%E9%A2%98/" class="archive-article-date">
+  	<time datetime="2020-07-12T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="经典的多线程通信问题：生产者与消费者问题"><a href="#经典的多线程通信问题：生产者与消费者问题" class="headerlink" title="经典的多线程通信问题：生产者与消费者问题"></a>经典的多线程通信问题：生产者与消费者问题</h3><a id="more"></a>
+
+<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p><strong>线程之间的配合执行，有时需要有先后顺序</strong><br><strong>场景1</strong> 线程1进行下载音乐，线程2进行播放音乐，那么只有线程1完成后再进行线程2才是合理的。<br><strong>场景2</strong> 生产者为厨师，消费者为服务员，服务员需要等厨师做完菜，才能将菜端上桌</p>
+<p>生产者线程需要完成生产，再唤醒消费者线程，然后生产者线程睡眠；<br>然后，等消费者线程完成，需要唤醒生产者继续生产，然后消费者睡眠</p>
+<h3 id="代码示例（以场景2为例）"><a href="#代码示例（以场景2为例）" class="headerlink" title="代码示例（以场景2为例）"></a>代码示例（以场景2为例）</h3><p>会出现问题的代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo11</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Food f = <span class="keyword">new</span> Food();</span><br><span class="line">      <span class="comment">//分别创建厨师和服务员线程，并启动</span></span><br><span class="line">        <span class="keyword">new</span> Cook(f).start();</span><br><span class="line">        <span class="keyword">new</span> Waiter(f).start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Cook</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Food f;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Cook</span><span class="params">(Food f)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.f = f;</span><br><span class="line">        &#125;</span><br><span class="line">      </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (i % <span class="number">2</span> == <span class="number">0</span>) &#123;</span><br><span class="line">                    f.setNameAndTaste(<span class="string">"老干妈炒米饭"</span>, <span class="string">"香辣味"</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    f.setNameAndTaste(<span class="string">"煎饼果子"</span>, <span class="string">"甜辣味"</span>);</span><br><span class="line">                &#125; <span class="comment">// if</span></span><br><span class="line">            &#125; <span class="comment">// for</span></span><br><span class="line">        &#125;<span class="comment">// run</span></span><br><span class="line">    &#125;<span class="comment">//Thread</span></span><br><span class="line">  </span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Waiter</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Food f;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Waiter</span><span class="params">(Food f)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.f = f;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                f.get();</span><br><span class="line">            &#125; <span class="comment">//for</span></span><br><span class="line">        &#125; <span class="comment">// run</span></span><br><span class="line">    &#125;<span class="comment">// Waiter</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Food</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> String name;</span><br><span class="line">        <span class="keyword">private</span> String taste;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setNameAndTaste</span><span class="params">(String name, String taste)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.name = name;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">100</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">this</span>.taste = taste;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"服务员端走菜得名称是："</span> + name + <span class="string">"味道："</span> + taste);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果如下，炒米饭的味道出现了错乱</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">....</span><br><span class="line">服务员端走菜得名称是：老干妈炒米饭味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：香辣味</span><br><span class="line">服务员端走菜得名称是：老干妈炒米饭味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：香辣味</span><br></pre></td></tr></table></figure>
+
+<p>这是为什么呢？</p>
+<blockquote>
+<p>可能出现的情况是，当厨师线程刚在第52行set完食物的味道，还没来得及设置味道，就遇到了sleep休眠。这时轮到服务员线程运行61行的get方法，直接将菜端走并显示名称和味道。然而味道可能还是上一次设置的甜辣味，所以出现了错乱。</p>
+</blockquote>
+<h4 id="那么该如何解决这个问题？"><a href="#那么该如何解决这个问题？" class="headerlink" title="那么该如何解决这个问题？"></a>那么该如何解决这个问题？</h4><h5 id="1-如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…"><a href="#1-如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…" class="headerlink" title="1. 如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…"></a>1. 如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">setNameAndTaste</span><span class="params">(String name, String taste)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.name = name;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    Thread.sleep(<span class="number">100</span>);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">this</span>.taste = taste;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  System.out.println(<span class="string">"服务员端走菜的名称是："</span> + name + <span class="string">"味道："</span> + taste);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>会出现如下问题，同一个味道会不断重复重复重复..</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：老干妈炒米饭味道：香辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>这又是为什么呢？</p>
+<blockquote>
+<p>要注意，虽然同步方法保证了方法的排队，一个方法运行完，再进行下一个，但是并不能保证线程们执行的顺序是公平的、先到先得的。由于java默认的抢占式调度机制，线程还是会去争抢空余出来的锁或资源。所以如果服务员线程一直更先抢到了执行资格，厨师线程一直不会被执行，此时就不能保证我们所需要的线程执行的先后顺序。</p>
+</blockquote>
+<h5 id="2-解决方案"><a href="#2-解决方案" class="headerlink" title="2. 解决方案"></a>2. 解决方案</h5><blockquote>
+<p>线程1运行时，让线程2睡眠，运行完再唤醒线程2，然后线程2运行，运行完接着唤醒线程1，然后线程2睡眠</p>
+</blockquote>
+<blockquote>
+<p>使用flag标记，调用wait()和notify()方法完成该解决方案。wait()使得线程睡眠，notify()唤醒线程。</p>
+</blockquote>
+<p>其他代码不变，改造如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Food</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> String name;</span><br><span class="line">        <span class="keyword">private</span> String taste;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">boolean</span> flag = <span class="keyword">true</span>; <span class="comment">// true表示可以生产</span></span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">setNameAndTaste</span><span class="params">(String name, String taste)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (flag) &#123;</span><br><span class="line">                <span class="keyword">this</span>.name = name;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">this</span>.taste = taste;</span><br><span class="line">               </span><br><span class="line">                flag = <span class="keyword">false</span>;     <span class="comment">// 厨师生产任务 完成</span></span><br><span class="line">                <span class="keyword">this</span>.notifyAll(); <span class="comment">// 唤醒当前在this下睡眠的所有线程 （服务员）</span></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">this</span>.wait();  <span class="comment">// 当前线程睡着 （厨师）</span></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; </span><br><span class="line">            &#125; <span class="comment">// if</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (!flag) &#123;</span><br><span class="line">                System.out.println(<span class="string">"服务员端走菜得名称是："</span> + name + <span class="string">"味道："</span> + taste);</span><br><span class="line">                flag = <span class="keyword">true</span>;      <span class="comment">// 服务员端菜任务 完成</span></span><br><span class="line">                <span class="keyword">this</span>.notifyAll(); <span class="comment">// 唤醒当前在this下睡眠的所有线程 （厨师）</span></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">this</span>.wait();   <span class="comment">//当前线程睡着 （服务员）</span></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="comment">// if</span></span><br><span class="line">        &#125; <span class="comment">// get</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行结果符合我们的需求，两个线程交替执行</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：老干妈炒米饭味道：香辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：老干妈炒米饭味道：香辣味</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+      
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <!-- 增加版权声明 -->
+
+            <!- 百度自动推送方式提交 -->
+            
+              <script>
+              (function(){
+                  var bp = document.createElement('script');
+                  var curProtocol = window.location.protocol.split(':')[0];
+                  if (curProtocol === 'https') {
+                      bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+                  }
+                  else {
+                      bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+                  }
+                  var s = document.getElementsByTagName("script")[0];
+                  s.parentNode.insertBefore(bp, s);
+              })();
+              </script>
+            
+            <!- 百度自动推送方式提交结束 -->
+
+            
+            
+            <div class="declare" hidden="hidden"></div>
+            
+
+            <!-- 增加版权声明结束 -->  
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assets/img/alipay.png">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">随笔</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://atlanticsay.github.io/http://yoursite.com/2020/07/13/2020-07-13-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E9%80%9A%E8%AE%AF%E9%97%AE%E9%A2%98/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2020/07/13/2020-07-12-%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E7%9A%84%E5%88%92%E5%88%86/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          线程状态的划分：操作系统与Java
+        
+      </div>
+    </a>
   
   
-    </div></section>
+    <a href="/2020/07/09/macOS%20Configuration%20for%20JDK11/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">macOS Configuration for JDK11</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#经典的多线程通信问题：生产者与消费者问题"><span class="toc-number">1.</span> <span class="toc-text">经典的多线程通信问题：生产者与消费者问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#概述"><span class="toc-number">2.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#代码示例（以场景2为例）"><span class="toc-number">3.</span> <span class="toc-text">代码示例（以场景2为例）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#那么该如何解决这个问题？"><span class="toc-number">3.1.</span> <span class="toc-text">那么该如何解决这个问题？</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…"><span class="toc-number">3.1.1.</span> <span class="toc-text">1. 如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-解决方案"><span class="toc-number">3.1.2.</span> <span class="toc-text">2. 解决方案</span></a></li></ol></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -231,8 +451,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
@@ -301,7 +521,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">随笔</a>
+                <a href="javascript:void(0)" class="js-tag color4">多线程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">配置</a>
               </li>
             
             <div class="clearfix"></div>
