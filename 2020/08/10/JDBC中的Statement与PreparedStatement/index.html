@@ -6,14 +6,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Tag: 配置 | Hexo</title>
+  <title>JDBC中的Statement与PreparedStatement | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/tags/%E9%85%8D%E7%BD%AE/index.html">
+  <meta name="description" content="java与数据库交互：Statement与PreparedStatement 对比, 及简约使用指南">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JDBC中的Statement与PreparedStatement">
+<meta property="og:url" content="http://yoursite.com/2020/08/10/JDBC%E4%B8%AD%E7%9A%84Statement%E4%B8%8EPreparedStatement/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="java与数据库交互：Statement与PreparedStatement 对比, 及简约使用指南">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-08-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-08-08T02:26:10.319Z">
 <meta property="article:author" content="Hale">
+<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="JDBC">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
@@ -156,59 +163,348 @@
           </div>
           <div id="js-content" class="content-ll">
             
-  
-  
+<article id="post-JDBC中的Statement与PreparedStatement" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/07/09/macOS%20Configuration%20for%20JDK11/" class="archive-article-date">
-  	<time datetime="2020-07-08T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-09</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/07/09/macOS%20Configuration%20for%20JDK11/">macOS Configuration for JDK11</a>
+    <h1 class="article-title" itemprop="name">
+      JDBC中的Statement与PreparedStatement
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        <!--显示阅读次数-->
+        
+          <br/>
+          <a class="cloud-tie-join-count" href="javascript:void(0);" style="color:gray;font-size:14px;">
+          <span class="icon-sort"></span>
+          <span id="busuanzi_container_page_pv" style="color:#ef7522;font-size:14px;">
+                    阅读数: <span id="busuanzi_value_page_pv"></span>次 &nbsp;&nbsp;
+          </span>
+          </a>
+        
+        <!--显示阅读次数完毕-->
+        
+        <a href="/2020/08/10/JDBC%E4%B8%AD%E7%9A%84Statement%E4%B8%8EPreparedStatement/" class="archive-article-date">
+  	<time datetime="2020-08-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-08-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="java与数据库交互：Statement与PreparedStatement-对比-及简约使用指南"><a href="#java与数据库交互：Statement与PreparedStatement-对比-及简约使用指南" class="headerlink" title="java与数据库交互：Statement与PreparedStatement 对比, 及简约使用指南"></a>java与数据库交互：Statement与PreparedStatement 对比, 及简约使用指南</h2><a id="more"></a>
+
+</br>
+
+<h3 id="引言-SQL语句的一般执行过程"><a href="#引言-SQL语句的一般执行过程" class="headerlink" title="引言: SQL语句的一般执行过程"></a>引言: SQL语句的一般执行过程</h3><p>​            本文主角是Java数据库连接（Java DataBase Connectivity , JDBC）中的SQL连接对象 —  <code>Statement</code>与<code>PreparedStatement</code>。在讲这两者之前，首先我们需要回顾一下SQL语句的一般执行过程：</p>
+<p><strong>1.建立连接</strong>：客户端通过<code>连接器</code>与服务器端进行连接</p>
+<p><strong>2.查询缓存</strong>：</p>
+<ul>
+<li>缓存可能以<code>key(语句)-value(结果)</code>的形式被存在缓存中</li>
+<li>如果从客户端传送过来的SQL语句在缓存中存在，则使用已经分析过的缓存来执行或返回已经存 在的结果，节省了后续解析或生成执行计划的步骤，此为<code>软解析</code>。</li>
+<li>若不存在，则进行后续词法、语法分析、执行计划优化的过程，即为<code>硬解析</code>。</li>
+</ul>
+<p><strong>3.解析</strong>：</p>
+<ul>
+<li><code>词法分析</code>：SQL语句由字符串和空格构成，识别其中的SQL关键字等的过程</li>
+<li><code>语法分析</code>：语法分析器根据语法规则判断输入的SQL语句是否满足语法。</li>
+<li>如果语法分析没有出错，得到语法树，进行下一步；否则进行错误提醒。</li>
+</ul>
+<p><strong>4.执行计划优化</strong>：<code>优化器</code>对执行顺序进行优化，例如 确定</p>
+<ul>
+<li>表中有多个索引的时候使用哪个</li>
+<li>一个语句有多个join关联的时候，连接顺序如何</li>
+</ul>
+<p><strong>5.执行与返回结果</strong>：<code>执行器</code>对语句进行执行</p>
+<ul>
+<li><p>判断对目标表有无查询等权限：如果有，打开表继续执行；如果没有报错,将满足条件的行组成记录集作为结果返回给客户端</p>
+</br> 
+
+</li>
+</ul>
+<h3 id="Statement与PreparedStatement的使用方法"><a href="#Statement与PreparedStatement的使用方法" class="headerlink" title="Statement与PreparedStatement的使用方法"></a>Statement与PreparedStatement的使用方法</h3><p>​            Statement 与 PreparedStatement都是JDBC中的接口，用于不同数据库的SQL语句的执行与结果的返回。其中PreparedStatement继承自Statement，表示预编译的SQL语句。</p>
+<p>Statement调用方式，示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//1 获取数据库连接对象</span></span><br><span class="line">Connection conn = DriverManager.getConnection(<span class="string">"jdbc:mysql://localhost:3306/yunyun?useUnicode=true&amp;characterEncoding=utf-8"</span>,<span class="string">"root"</span>,<span class="string">""</span>);</span><br><span class="line"><span class="comment">//2 从连接中获取Statement对象</span></span><br><span class="line">Statement state = conn.createStatement();</span><br><span class="line"><span class="comment">//3 执行SQL语句 i为任意参数</span></span><br><span class="line"><span class="keyword">int</span> row = state.executeUpdate(<span class="string">"insert into kk_user value('admin','123"</span> + i + <span class="string">"')"</span>);</span><br><span class="line"><span class="comment">//4 关闭连接</span></span><br><span class="line">state.close();</span><br><span class="line">conn.close();</span><br></pre></td></tr></table></figure>
+</br>
+
+<p>PreparedStatement调用方式，示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//1 获取数据库连接对象</span></span><br><span class="line">Connection conn = DriverManager.getConnection(<span class="string">"jdbc:mysql://localhost:3306/yunyun?useUnicode=true&amp;characterEncoding=utf-8"</span>,<span class="string">"root"</span>,<span class="string">""</span>);</span><br><span class="line"><span class="comment">//2 从连接中获取PreparedStatement对象</span></span><br><span class="line">PreparedStatement state = conn.prepareStatement(<span class="string">"insert into kk_user value(?, ?)"</span>);</span><br><span class="line"><span class="comment">//3 设置参数</span></span><br><span class="line">state.setString(<span class="number">1</span>,<span class="string">"admin"</span>);</span><br><span class="line">state.setString(<span class="number">2</span>, <span class="string">"123"</span>);</span><br><span class="line"><span class="comment">//4 执行SQL语句</span></span><br><span class="line">state.executeUpdate();</span><br><span class="line"><span class="comment">//5 关闭连接</span></span><br><span class="line">state.close();</span><br><span class="line">conn.close();</span><br></pre></td></tr></table></figure>
+
+<p></br></br></p>
+<h3 id="简析Statement与PreparedStatement"><a href="#简析Statement与PreparedStatement" class="headerlink" title="简析Statement与PreparedStatement"></a>简析Statement与PreparedStatement</h3><h5 id="PrepareStatement-优点1"><a href="#PrepareStatement-优点1" class="headerlink" title="PrepareStatement 优点1"></a>PrepareStatement 优点1</h5><p>对比以上代码块可以发现，PreparedStatement使用了占位符？，使得变量可以很方便地作为参数传入SQL语句中。通过这一点，便产生了PreparedStatement的最大优点——<strong>解决了SQL语句注入问题</strong>。SQL注入问题，即是SQL注入是在SQL语句进行拼接过程中，产生了逻辑发生变化的SQL语句。通俗来说，就是产生了歧义:</p>
+<blockquote>
+<p>举个例子，在进行用户登录时, 输入不存在的帐号 和 如下的密码: 1’ or ‘1’=’1   结果显示登录成功.<br>原查询语句: select * from xzk_user where username=’’ and password=’密码’<br>拼接后:    select * from xzk_user where username=’haha’ and  password=’1’ or ‘1’=’1’<br>在此例中,用户输入的密码, 与查询语句拼接后, 使得查询语句产生了歧义,where条件永远为真。</p>
+</blockquote>
+<h5 id="PrepareStatement-优点2"><a href="#PrepareStatement-优点2" class="headerlink" title="PrepareStatement 优点2"></a>PrepareStatement 优点2</h5><p>PreparedStatement的另一个潜在优点为：<strong>节省了SQL语句的解析时间/重复编译的时间</strong>。不同的数据库的prepare内容不尽相同，其中Oracle的预准备比MySQL的更加高效：</p>
+<p>(1) <strong>MySQL</strong> JDBC PreparedStatement在Java端进行了参数的替换，可以对SQL语句执行流程中的<code>词法分析</code> 和<code>语法分析</code> 两步进行缓存（注1）。</p>
+<blockquote>
+<p>但是MySQL一点都不软，没有对执行计划进行缓存<br>所以对它来说，PreparedStatement与Statement的性能可能相差不大</p>
+</blockquote>
+</br>
+(2) **Oracle** JDBC PreparedStatement 则做了更多的事情：不仅对硬解析进行了缓存，也缓存了优化的```执行计划```。再次传递的参数不具备特殊含义，即遇到已经被缓存的语句、但是占位符```？```处设定的参数不同时，仍只需要直接执行execute即可。
+
+<blockquote>
+<p>换句话说，当再次遇到已经存在在缓存中的SQL语句时，oracle可以实现<strong>软解析</strong>，大大节约资源<br>所以对它来说，PreparedStatement的性能要比Statement高</p>
+</blockquote>
+</br>
+
+<h5 id="补充说明"><a href="#补充说明" class="headerlink" title="补充说明"></a>补充说明</h5><p>上文提到第二个优点为“潜在”优点，这又是为什么呢？因为，使用PreparedStatement，并且打开可选项（缓存开关），会进行查询缓存，但是：</p>
+<blockquote>
+<p>MySQL中只要有对一个表的更新，该表的查询缓存都会被清空，如果耗费资源存储的缓存还没有使用，就被清除，便造成了一定的浪费，特别是对于更新压力大的数据库来说。但如果目标业务只有一张静态表，少有更新，如系统配置表，那么便适合使用查询缓存。</p>
+</blockquote>
+<p>所以MySQL 8.0 版本直接将查询缓存的整块功能删掉了。</p>
+<h5 id="那么到底该使用Statement还是PreparedStatement呢？？"><a href="#那么到底该使用Statement还是PreparedStatement呢？？" class="headerlink" title="那么到底该使用Statement还是PreparedStatement呢？？"></a>那么到底该使用<code>Statement</code>还是<code>PreparedStatement</code>呢？？</h5><blockquote>
+<p>对于新手，建议使用PreparedStatement，特别是需要参数传递时，因为PreparedStatement可以有效防止sql语句注入问题。</p>
+</blockquote>
+</br>
+
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>PreparedStatement与Statement的对比如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left">PreparedStatement</th>
+<th align="left">Statement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">sql注入问题</td>
+<td align="left">解决</td>
+<td align="left">存在</td>
+</tr>
+<tr>
+<td align="left">预编译与缓存</td>
+<td align="left">不同的数据库不同</td>
+<td align="left">无，每次都得重新编译</td>
+</tr>
+</tbody></table>
+<p>PreparedStatement中oracle与mysql的对比如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left">预编译</th>
+<th align="left">缓存</th>
+<th align="left">缓存执行计划</th>
+<th align="left">注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Oracle</td>
+<td align="left">如果缓存中没有，则进行预编译</td>
+<td align="left">有</td>
+<td align="left">有</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">MySQL</td>
+<td align="left">默认不开启，可选：useServerPrepStmts=true</td>
+<td align="left">默认不开启，可选：cachePrepStmts=true</td>
+<td align="left">无</td>
+<td align="left">Connector/J5.0.5以上的版本</td>
+</tr>
+</tbody></table>
+<br/>
+
+<h4 id="注释及参考"><a href="#注释及参考" class="headerlink" title="注释及参考"></a>注释及参考</h4><p>注：<br>[1] Connector/J5.0.5及以上版本的MySQL JDBC，需要同时开启useServerPrepStmts=true, cachePrepStmts=true，才能进行缓存并对两句一样的SQL语句只进行一次硬解析</p>
+<p>Ref:<br>[1] <a href="https://www.cnblogs.com/lansetiankongblog/p/10968984.html" target="_blank" rel="noopener">https://www.cnblogs.com/lansetiankongblog/p/10968984.html</a><br>[2] <a href="https://www.cnblogs.com/zzl-156783663/p/8506488.html" target="_blank" rel="noopener">https://www.cnblogs.com/zzl-156783663/p/8506488.html</a><br>[3] <a href="https://blog.csdn.net/qq_24369113/article/details/52130433" target="_blank" rel="noopener">https://blog.csdn.net/qq_24369113/article/details/52130433</a><br>[4] <a href="https://www.cnblogs.com/DataArt/p/10240829.html" target="_blank" rel="noopener">https://www.cnblogs.com/DataArt/p/10240829.html</a><br>[5] <a href="https://blog.csdn.net/axman/article/details/6913527" target="_blank" rel="noopener">https://blog.csdn.net/axman/article/details/6913527</a></p>
+
+      
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <!-- 增加版权声明 -->
+
+            <!- 百度自动推送方式提交 -->
+            
+              <script>
+              (function(){
+                  var bp = document.createElement('script');
+                  var curProtocol = window.location.protocol.split(':')[0];
+                  if (curProtocol === 'https') {
+                      bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+                  }
+                  else {
+                      bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+                  }
+                  var s = document.getElementsByTagName("script")[0];
+                  s.parentNode.insertBefore(bp, s);
+              })();
+              </script>
+            
+            <!- 百度自动推送方式提交结束 -->
+
+            
+            
+            <div class="declare" hidden="hidden"></div>
+            
+
+            <!-- 增加版权声明结束 -->  
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assets/img/alipay.png">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">配置</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">数据库</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JDBC</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://atlanticsay.github.io/http://yoursite.com/2020/08/10/JDBC%E4%B8%AD%E7%9A%84Statement%E4%B8%8EPreparedStatement/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2020/07/14/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Hello World</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#java与数据库交互：Statement与PreparedStatement-对比-及简约使用指南"><span class="toc-number">1.</span> <span class="toc-text">java与数据库交互：Statement与PreparedStatement 对比, 及简约使用指南</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#引言-SQL语句的一般执行过程"><span class="toc-number">1.1.</span> <span class="toc-text">引言: SQL语句的一般执行过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Statement与PreparedStatement的使用方法"><span class="toc-number">1.2.</span> <span class="toc-text">Statement与PreparedStatement的使用方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#简析Statement与PreparedStatement"><span class="toc-number">1.3.</span> <span class="toc-text">简析Statement与PreparedStatement</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#PrepareStatement-优点1"><span class="toc-number">1.3.0.1.</span> <span class="toc-text">PrepareStatement 优点1</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#PrepareStatement-优点2"><span class="toc-number">1.3.0.2.</span> <span class="toc-text">PrepareStatement 优点2</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#补充说明"><span class="toc-number">1.3.0.3.</span> <span class="toc-text">补充说明</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#那么到底该使用Statement还是PreparedStatement呢？？"><span class="toc-number">1.3.0.4.</span> <span class="toc-text">那么到底该使用Statement还是PreparedStatement呢？？</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#小结"><span class="toc-number">1.3.1.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#注释及参考"><span class="toc-number">1.3.2.</span> <span class="toc-text">注释及参考</span></a></li></ol></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -231,9 +527,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,

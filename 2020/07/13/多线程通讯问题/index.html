@@ -6,23 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>线程状态的划分：操作系统与Java | Hexo</title>
+  <title>多线程通信问题 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧">
+  <meta name="description" content="经典的多线程通信问题：生产者与消费者问题">
 <meta property="og:type" content="article">
-<meta property="og:title" content="线程状态的划分：操作系统与Java">
-<meta property="og:url" content="http://yoursite.com/2020/07/13/2020-07-12-%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E7%9A%84%E5%88%92%E5%88%86/index.html">
+<meta property="og:title" content="多线程通信问题">
+<meta property="og:url" content="http://yoursite.com/2020/07/13/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E9%80%9A%E8%AE%AF%E9%97%AE%E9%A2%98/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧">
+<meta property="og:description" content="经典的多线程通信问题：生产者与消费者问题">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://raw.githubusercontent.com/Atlanticsay/MixtureFiles/master/images/States.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/Atlanticsay/MixtureFiles/master/images/thread%20states%20and%20their%20transition.png">
 <meta property="article:published_time" content="2020-07-12T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-07-14T04:09:27.721Z">
+<meta property="article:modified_time" content="2020-07-13T03:07:41.415Z">
 <meta property="article:author" content="Hale">
 <meta property="article:tag" content="多线程">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/Atlanticsay/MixtureFiles/master/images/States.png">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -70,7 +67,7 @@
 			</ul>
 		</nav>
 		<nav>
-			总文章数 4
+			总文章数 5
 		</nav>
 		<nav class="header-smart-menu">
     		
@@ -164,14 +161,14 @@
           </div>
           <div id="js-content" class="content-ll">
             
-<article id="post-2020-07-12-线程状态的划分" class="article article-type-post " itemscope itemprop="blogPost">
+<article id="post-多线程通讯问题" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      线程状态的划分：操作系统与Java
+      多线程通信问题
     </h1>
   
 
@@ -187,7 +184,7 @@
         
         <!--显示阅读次数完毕-->
         
-        <a href="/2020/07/13/2020-07-12-%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E7%9A%84%E5%88%92%E5%88%86/" class="archive-article-date">
+        <a href="/2020/07/13/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E9%80%9A%E8%AE%AF%E9%97%AE%E9%A2%98/" class="archive-article-date">
   	<time datetime="2020-07-12T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-13</time>
 </a>
         
@@ -195,76 +192,47 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧"><a href="#java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧" class="headerlink" title="java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧"></a>java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧</h3><a id="more"></a>
+        <h3 id="经典的多线程通信问题：生产者与消费者问题"><a href="#经典的多线程通信问题：生产者与消费者问题" class="headerlink" title="经典的多线程通信问题：生产者与消费者问题"></a>经典的多线程通信问题：生产者与消费者问题</h3><a id="more"></a>
 
-<h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>在现代操作系统中，一个进程通常由多个称为线程的执行单元组成，每个线程都运行在进程的上下文中，并共享同样的代码和全局数据。线程如同进程一样，在给定的时间内，可能处于不同的状态（本文暂时不谈线程间的上下文转换）。而JVM规定线程采用抢占式调度策略（schedule policy），即让线程抢占时间片，然后确定哪个线程可以占用CPU资源进行执行，该策略与java中线程状态的划分密切相关。总的来说，操作系统中线程状态的划分和java官方给定的划分不尽相同，因此本文对此作了区分和阐述。</p>
-<h4 id="操作系统线程划分"><a href="#操作系统线程划分" class="headerlink" title="操作系统线程划分"></a>操作系统线程划分</h4><p>操作系统中，和进程相似，线程的状态主要有运行（Running）、阻塞（Blocked）、以及就绪（Ready）[1]</p>
-<p>如下图所示</p>
-<div align=center><img src="https://raw.githubusercontent.com/Atlanticsay/MixtureFiles/master/images/States.png" style="zoom:60%;" /></div>
+<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p><strong>线程之间的配合执行，有时需要有先后顺序</strong><br><strong>场景1</strong> 线程1进行下载音乐，线程2进行播放音乐，那么只有线程1完成后再进行线程2才是合理的。<br><strong>场景2</strong> 生产者为厨师，消费者为服务员，服务员需要等厨师做完菜，才能将菜端上桌</p>
+<p>生产者线程需要完成生产，再唤醒消费者线程，然后生产者线程睡眠；<br>然后，等消费者线程完成，需要唤醒生产者继续生产，然后消费者睡眠</p>
+<h3 id="代码示例（以场景2为例）"><a href="#代码示例（以场景2为例）" class="headerlink" title="代码示例（以场景2为例）"></a>代码示例（以场景2为例）</h3><p>会出现问题的代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo11</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Food f = <span class="keyword">new</span> Food();</span><br><span class="line">      <span class="comment">//分别创建厨师和服务员线程，并启动</span></span><br><span class="line">        <span class="keyword">new</span> Cook(f).start();</span><br><span class="line">        <span class="keyword">new</span> Waiter(f).start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Cook</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Food f;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Cook</span><span class="params">(Food f)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.f = f;</span><br><span class="line">        &#125;</span><br><span class="line">      </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (i % <span class="number">2</span> == <span class="number">0</span>) &#123;</span><br><span class="line">                    f.setNameAndTaste(<span class="string">"老干妈炒米饭"</span>, <span class="string">"香辣味"</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    f.setNameAndTaste(<span class="string">"煎饼果子"</span>, <span class="string">"甜辣味"</span>);</span><br><span class="line">                &#125; <span class="comment">// if</span></span><br><span class="line">            &#125; <span class="comment">// for</span></span><br><span class="line">        &#125;<span class="comment">// run</span></span><br><span class="line">    &#125;<span class="comment">//Thread</span></span><br><span class="line">  </span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Waiter</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Food f;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Waiter</span><span class="params">(Food f)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.f = f;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                f.get();</span><br><span class="line">            &#125; <span class="comment">//for</span></span><br><span class="line">        &#125; <span class="comment">// run</span></span><br><span class="line">    &#125;<span class="comment">// Waiter</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Food</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> String name;</span><br><span class="line">        <span class="keyword">private</span> String taste;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setNameAndTaste</span><span class="params">(String name, String taste)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.name = name;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">100</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">this</span>.taste = taste;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"服务员端走菜得名称是："</span> + name + <span class="string">"味道："</span> + taste);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果如下，炒米饭的味道出现了错乱</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">....</span><br><span class="line">服务员端走菜得名称是：老干妈炒米饭味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：香辣味</span><br><span class="line">服务员端走菜得名称是：老干妈炒米饭味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：香辣味</span><br></pre></td></tr></table></figure>
+
+<p>这是为什么呢？</p>
+<blockquote>
+<p>可能出现的情况是，当厨师线程刚在第52行set完食物的味道，还没来得及设置味道，就遇到了sleep休眠。这时轮到服务员线程运行61行的get方法，直接将菜端走并显示名称和味道。然而味道可能还是上一次设置的甜辣味，所以出现了错乱。</p>
+</blockquote>
+<h4 id="那么该如何解决这个问题？"><a href="#那么该如何解决这个问题？" class="headerlink" title="那么该如何解决这个问题？"></a>那么该如何解决这个问题？</h4><h5 id="1-如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…"><a href="#1-如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…" class="headerlink" title="1. 如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…"></a>1. 如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">setNameAndTaste</span><span class="params">(String name, String taste)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.name = name;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    Thread.sleep(<span class="number">100</span>);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">this</span>.taste = taste;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  System.out.println(<span class="string">"服务员端走菜的名称是："</span> + name + <span class="string">"味道："</span> + taste);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>会出现如下问题，同一个味道会不断重复重复重复..</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：老干妈炒米饭味道：香辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>这又是为什么呢？</p>
+<blockquote>
+<p>要注意，虽然同步方法保证了方法的排队，一个方法运行完，再进行下一个，但是并不能保证线程们执行的顺序是公平的、先到先得的。由于java默认的抢占式调度机制，线程还是会去争抢空余出来的锁或资源。所以如果服务员线程一直更先抢到了执行资格，厨师线程一直不会被执行，此时就不能保证我们所需要的线程执行的先后顺序。</p>
+</blockquote>
+<h5 id="2-解决方案"><a href="#2-解决方案" class="headerlink" title="2. 解决方案"></a>2. 解决方案</h5><blockquote>
+<p>线程1运行时，让线程2睡眠，运行完再唤醒线程2，然后线程2运行，运行完接着唤醒线程1，然后线程2睡眠</p>
+</blockquote>
+<blockquote>
+<p>使用flag标记，调用wait()和notify()方法完成该解决方案。wait()使得线程睡眠，notify()唤醒线程。</p>
+</blockquote>
+<p>其他代码不变，改造如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Food</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> String name;</span><br><span class="line">        <span class="keyword">private</span> String taste;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">boolean</span> flag = <span class="keyword">true</span>; <span class="comment">// true表示可以生产</span></span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">setNameAndTaste</span><span class="params">(String name, String taste)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (flag) &#123;</span><br><span class="line">                <span class="keyword">this</span>.name = name;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">this</span>.taste = taste;</span><br><span class="line">               </span><br><span class="line">                flag = <span class="keyword">false</span>;     <span class="comment">// 厨师生产任务 完成</span></span><br><span class="line">                <span class="keyword">this</span>.notifyAll(); <span class="comment">// 唤醒当前在this下睡眠的所有线程 （服务员）</span></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">this</span>.wait();  <span class="comment">// 当前线程睡着 （厨师）</span></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; </span><br><span class="line">            &#125; <span class="comment">// if</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (!flag) &#123;</span><br><span class="line">                System.out.println(<span class="string">"服务员端走菜得名称是："</span> + name + <span class="string">"味道："</span> + taste);</span><br><span class="line">                flag = <span class="keyword">true</span>;      <span class="comment">// 服务员端菜任务 完成</span></span><br><span class="line">                <span class="keyword">this</span>.notifyAll(); <span class="comment">// 唤醒当前在this下睡眠的所有线程 （厨师）</span></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">this</span>.wait();   <span class="comment">//当前线程睡着 （服务员）</span></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="comment">// if</span></span><br><span class="line">        &#125; <span class="comment">// get</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行结果符合我们的需求，两个线程交替执行</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：老干妈炒米饭味道：香辣味</span><br><span class="line">服务员端走菜得名称是：煎饼果子味道：甜辣味</span><br><span class="line">服务员端走菜得名称是：老干妈炒米饭味道：香辣味</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 
 
-<p>从就绪到运行，代表该线程已经被调度（Scheduled），从运行转移到就绪，代表取消调度（descheduled）。一旦被阻塞，如发起I/O操作，OS将保持这种状态，直到发生某件事情，如I/O完成。此时便进入就绪状态 [2]。</p>
-<h4 id="Java中的线程状态划分"><a href="#Java中的线程状态划分" class="headerlink" title="Java中的线程状态划分"></a>Java中的线程状态划分</h4><p>查看官方文档<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html" target="_blank" rel="noopener">Thread.State</a>，线程的状态被划分为了六种：初始（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#NEW" target="_blank" rel="noopener">NEW</a> ）、运行中（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#RUNNABLE" target="_blank" rel="noopener">RUNNABLE</a> ）、阻塞（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#BLOCKED" target="_blank" rel="noopener">BLOCKED</a> ）、等待（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#WAITING" target="_blank" rel="noopener">WAITING</a> ）、超时等待/计时等待（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#TIMED_WAITING" target="_blank" rel="noopener">TIMED_WAITING</a> ）、终止（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.State.html#TERMINATED" target="_blank" rel="noopener">TERMINATED</a> ）。它们之间的转换关系如下图所示 [3]：</p>
-<p><img src="https://raw.githubusercontent.com/Atlanticsay/MixtureFiles/master/images/thread%20states%20and%20their%20transition.png" alt=""></p>
- <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 官方文档里明确说明，这些状态并不代表任何操作系统线程的状态</span></span><br><span class="line">doc: These states are virtual machine states which <span class="keyword">do</span> not reflect any operating system thread states.</span><br><span class="line"><span class="comment">// 但是也提示了，RUNNABLE状态，除了执行，也包括在等待操作系统资源的情况，即包括操作系统的运行和就绪</span></span><br><span class="line">A thread in the runnable state is executing in the Java virtual machine but it may be waiting <span class="keyword">for</span> other resources from the operating system such as processor.</span><br></pre></td></tr></table></figure>
 
-<p>每个状态的解释和产生条件如下：<br>1.NEW 状态：表示刚被创建，但是还没有启动</p>
-<p>2.<strong>RUNNABLE状态：是操作系统中 <code>就绪</code> 和<code>运行</code>两种状态的统称</strong></p>
-<blockquote>
-<p>具体是哪个取决于JVM线程调度器的schedule</p>
-<ul>
-<li><p>当前线程调用<code>Thread.start()</code></p>
-</li>
-<li><p>当前线程<code>Thread.sleep()</code>的时间到</p>
-</li>
-<li><p>其他线程调用<code>join()</code>结束后</p>
-</li>
-<li><p>线程抢到了锁，从<code>BLOCKED</code>状态转化为就绪状态</p>
-<p>👆上面几个都是转化为<code>就绪</code>状态</p>
-</li>
-<li><p>当前或其他线程调用 <code>LockSupport.unpark(Thread)</code></p>
-</li>
-</ul>
-</blockquote>
-<p>3.BLOCKED状态：表示线程正在等待监视器锁，以便抢到锁之后执行。</p>
-<blockquote>
-<ul>
-<li>线程在等待锁进入由synchronized修饰的<code>同步方法</code>或<code>同步代码</code>块时，会进入阻塞状态；</li>
-</ul>
-<p>​       获取锁后变为<code>就绪</code>状态</p>
-<ul>
-<li>当前线程从<code>WAITING</code>状态中醒来，通过调用<code>Object.notify()</code>, 或<code>Object.notifyAll()</code></li>
-</ul>
-</blockquote>
-<p>4.WAITING状态：无限休眠直到被某个线程唤醒。进入该状态的原因：</p>
-<blockquote>
-<ul>
-<li><p>当前线程对象调用<code>Object.wait()</code>方法</p>
-<p>（使用<code>notify()</code>或<code>notifyAll()</code>唤醒；或<code>LockSupport.unpark(Thread t)</code>唤醒）</p>
-</li>
-<li><p>当前线程运行过程中，其他线程调用<code>Thread.join()</code>方法</p>
-</li>
-<li><p>调用<code>LockSupport.park()</code> （不会释放锁资源）</p>
-</li>
-</ul>
-</blockquote>
-<p>5.TIME_WAITING状态：计时等待一段给定的时间便醒来</p>
-<blockquote>
-<ul>
-<li>当前线程调用<code>Thread.sleep(long time)</code> （不会释放占有的锁）</li>
-<li>当前线程中的对象调用 <code>Object.wait(long time)</code> （会释放锁资源）</li>
-<li>其他线程调用 <code>join(time)</code> </li>
-<li>线程调用<code>LockSupport.parkNanos()</code> 或 <code>LockSupport.partUntil()</code></li>
-</ul>
-</blockquote>
-<p>6.TERMINATE状态：终止</p>
-<blockquote>
-<ul>
-<li>线程正常终止：<code>run()</code>或<code>call()</code>方法执行完毕</li>
-<li>线程抛出Exception或Error</li>
-</ul>
-</blockquote>
-<p>Ref:<br>[1] <a href="https://web.stanford.edu/~ouster/cgi-bin/cs140-spring14/lecture.php?topic=thread" target="_blank" rel="noopener">https://web.stanford.edu/~ouster/cgi-bin/cs140-spring14/lecture.php?topic=thread</a><br>[2] Operating System: Three Easy Pieces<br>[3] <a href="http://www.uml-diagrams.org/java-thread-uml-state-machine-diagram-example.html" target="_blank" rel="noopener">http://www.uml-diagrams.org/java-thread-uml-state-machine-diagram-example.html</a></p>
+
+
+
+
 
       
 
@@ -389,7 +357,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://atlanticsay.github.io/http://yoursite.com/2020/07/13/2020-07-12-%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E7%9A%84%E5%88%92%E5%88%86/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://atlanticsay.github.io/http://yoursite.com/2020/07/13/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E9%80%9A%E8%AE%AF%E9%97%AE%E9%A2%98/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -413,8 +381,8 @@
     </a>
   
   
-    <a href="/2020/07/13/2020-07-13-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E9%80%9A%E8%AE%AF%E9%97%AE%E9%A2%98/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">多线程通信问题</div>
+    <a href="/2020/07/10/%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E7%9A%84%E5%88%92%E5%88%86/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">线程状态的划分：操作系统与Java</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -441,7 +409,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧"><span class="toc-number">1.</span> <span class="toc-text">java中提及的线程状态与操作系统中线程状态，傻傻分不清？来阅读本文吧</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#引言"><span class="toc-number">1.1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#操作系统线程划分"><span class="toc-number">1.2.</span> <span class="toc-text">操作系统线程划分</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Java中的线程状态划分"><span class="toc-number">1.3.</span> <span class="toc-text">Java中的线程状态划分</span></a></li></ol></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#经典的多线程通信问题：生产者与消费者问题"><span class="toc-number">1.</span> <span class="toc-text">经典的多线程通信问题：生产者与消费者问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#概述"><span class="toc-number">2.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#代码示例（以场景2为例）"><span class="toc-number">3.</span> <span class="toc-text">代码示例（以场景2为例）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#那么该如何解决这个问题？"><span class="toc-number">3.1.</span> <span class="toc-text">那么该如何解决这个问题？</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…"><span class="toc-number">3.1.1.</span> <span class="toc-text">1. 如果给setNameAndTaste和set方法，加上synchronized关键字，强制方法一个运行完才能运行另一个…</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-解决方案"><span class="toc-number">3.1.2.</span> <span class="toc-text">2. 解决方案</span></a></li></ol></li></ol></li></ol>
                     </div>
                 </span>
             </div>
@@ -562,6 +530,18 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">配置</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">数据库</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">JDBC</a>
               </li>
             
             <div class="clearfix"></div>
